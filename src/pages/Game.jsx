@@ -82,9 +82,8 @@ export default function Game() {
     }
     setWordCount((c) => c + 1);
 
-    // 1 segundo si correcto, 5 segundos si incorrecto
     const delay = correct ? 1 : 5;
-    setCountdown(correct ? null : delay); // solo muestra countdown si se equivocó
+    setCountdown(correct ? null : delay);
 
     let remaining = delay;
     const interval = correct ? null : setInterval(() => {
@@ -140,44 +139,46 @@ export default function Game() {
   return (
     <div className="min-h-screen bg-[#0E0B20] flex flex-col">
       <Header />
-      <div className="fixed w-[600px] h-[600px] rounded-full bg-[#7E3FFE] opacity-[0.06] blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+      <div className="fixed w-[400px] h-[400px] md:w-[600px] md:h-[600px] rounded-full bg-[#7E3FFE] opacity-[0.06] blur-[120px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
 
-      <main className="flex-1 flex flex-col items-center px-6 py-6 relative z-10 max-w-5xl mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center px-3 md:px-6 py-4 md:py-6 relative z-10 max-w-5xl mx-auto w-full">
 
         {/* Progress */}
-        <div className="w-full flex items-center gap-4 mb-2">
+        <div className="w-full flex items-center gap-2 md:gap-4 mb-2">
           <div className="flex-1 h-2 bg-[#241D44] rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-[#7E3FFE] to-[#3C83FE] rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-[#9A8EBC] text-sm whitespace-nowrap">Word {wordCount} · All 300</span>
+          <span className="text-[#9A8EBC] text-xs whitespace-nowrap">W{wordCount}/300</span>
         </div>
 
         {/* Score + streak */}
-        <div className="w-full flex justify-between items-center mb-6">
-          <span className="text-white font-bold text-lg">
+        <div className="w-full flex justify-between items-center mb-3 md:mb-6">
+          <span className="text-white font-bold text-sm md:text-lg">
             Score: <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7E3FFE] to-[#3C83FE]">{score.toLocaleString()}</span>
           </span>
           {streak >= 2 && (
-            <span className="text-yellow-400 font-semibold text-sm animate-pulse">🔥 {streak} streak! +{streak * 10} bonus</span>
+            <span className="text-yellow-400 font-semibold text-xs md:text-sm animate-pulse">🔥 {streak}x +{streak * 10}</span>
           )}
         </div>
 
         {/* Question label + language tags */}
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3 flex-wrap justify-center">
           <span className="px-2 py-0.5 rounded-md bg-[#7E3FFE]/20 border border-[#7E3FFE]/40 text-[#9A8EBC] text-xs font-semibold">{question.promptTag}</span>
-          <p className="text-[#9A8EBC] text-sm">{question.promptLabel}</p>
+          <p className="text-[#9A8EBC] text-xs md:text-sm text-center">{question.promptLabel}</p>
           <span className="px-2 py-0.5 rounded-md bg-[#3C83FE]/20 border border-[#3C83FE]/40 text-[#9A8EBC] text-xs font-semibold">{question.optionTag}</span>
         </div>
 
         {/* Prompt card */}
-        <div className="w-full bg-[#241D44] border-2 border-[#7E3FFE]/40 rounded-2xl px-8 py-8 flex items-center justify-center mb-8 shadow-xl shadow-[#7E3FFE]/10 min-h-[130px]">
-          <span className={`text-white font-bold text-center leading-tight ${isLargePrompt ? "text-5xl md:text-6xl" : "text-2xl md:text-3xl"}`}>
+        <div className="w-full bg-[#241D44] border-2 border-[#7E3FFE]/40 rounded-2xl px-4 md:px-8 py-5 md:py-8 flex items-center justify-center mb-4 md:mb-8 shadow-xl shadow-[#7E3FFE]/10 min-h-[90px] md:min-h-[130px]">
+          <span className={`text-white font-bold text-center leading-tight break-words w-full ${
+            isLargePrompt ? "text-3xl md:text-5xl lg:text-6xl" : "text-lg md:text-2xl lg:text-3xl"
+          }`}>
             {question.prompt}
           </span>
         </div>
 
         {/* Answer options 2x2 */}
-        <div className="grid grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-2 gap-2 md:gap-4 w-full">
           {question.options.map((option, i) => {
             const c = COLORS[i];
             const isSelected = selected === option;
@@ -193,12 +194,14 @@ export default function Game() {
                 key={option}
                 onClick={() => handleAnswer(option)}
                 disabled={selected !== null}
-                className={`${c.bg} border ${c.border} rounded-2xl px-6 py-5 flex items-center gap-4 text-left shadow-lg ${c.glow} hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 disabled:cursor-default ${extraStyle}`}
+                className={`${c.bg} border ${c.border} rounded-xl md:rounded-2xl px-3 md:px-6 py-3 md:py-5 flex items-center gap-2 md:gap-4 text-left shadow-lg ${c.glow} hover:brightness-110 active:scale-[0.98] transition-all duration-150 disabled:cursor-default ${extraStyle}`}
               >
-                <span className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 border ${c.border} bg-white/10`}>
+                <span className={`w-7 h-7 md:w-9 md:h-9 rounded-full flex items-center justify-center text-white font-bold text-xs md:text-sm shrink-0 border ${c.border} bg-white/10`}>
                   {c.label}
                 </span>
-                <span className="text-white font-semibold text-base leading-snug">{option}</span>
+                <span className="text-white font-semibold text-xs md:text-base leading-snug break-words min-w-0">
+                  {option}
+                </span>
               </button>
             );
           })}
@@ -206,16 +209,15 @@ export default function Game() {
 
         {/* Feedback */}
         {selected !== null && (
-          <div className="mt-6 flex flex-col items-center gap-2">
-            <div className={`text-lg font-bold ${isCorrect ? "text-green-400" : "text-red-400"}`}>
+          <div className="mt-4 md:mt-6 flex flex-col items-center gap-2">
+            <div className={`text-sm md:text-lg font-bold text-center px-2 ${isCorrect ? "text-green-400" : "text-red-400"}`}>
               {isCorrect
                 ? `✓ Correct! +${100 + (streak - 1) * 10} pts`
-                : `✗ Correct answer: "${question.correct}"`}
+                : `✗ Answer: "${question.correct}"`}
             </div>
-            {/* Countdown solo si se equivocó */}
             {countdown !== null && (
-              <div className="flex items-center gap-2 text-red-400/70 text-sm font-medium">
-                <div className="w-7 h-7 rounded-full border-2 border-red-400/50 flex items-center justify-center font-bold text-base text-red-400">
+              <div className="flex items-center gap-2 text-red-400/70 text-xs md:text-sm font-medium">
+                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full border-2 border-red-400/50 flex items-center justify-center font-bold text-sm text-red-400">
                   {countdown}
                 </div>
                 <span>Read the answer carefully...</span>
@@ -227,7 +229,7 @@ export default function Game() {
         {/* Stop */}
         <button
           onClick={saveAndExit}
-          className="mt-8 px-6 py-2 rounded-lg bg-[#241D44] border border-red-500/40 text-red-400/80 text-sm hover:border-red-500 hover:text-red-400 transition-all"
+          className="mt-4 md:mt-8 px-5 py-2 rounded-lg bg-[#241D44] border border-red-500/40 text-red-400/80 text-xs md:text-sm hover:border-red-500 hover:text-red-400 transition-all"
         >
           ⏹ Stop Game
         </button>
