@@ -23,11 +23,6 @@ function getWrongOptions(correct, allWords, key) {
 }
 
 function buildQuestion(wordObj, allWords) {
-  // Distribución de modos:
-  // 50% → palabra EN, opciones significado EN
-  // 20% → significado EN, opciones palabra EN
-  // 15% → palabra EN, opciones significado ES
-  // 15% → palabra ES, opciones significado EN
   const rand = Math.random();
   let mode;
   if (rand < 0.50) mode = 0;
@@ -36,57 +31,21 @@ function buildQuestion(wordObj, allWords) {
   else mode = 3;
 
   if (mode === 0) {
-    // Palabra EN → significado EN
     const correct = wordObj.meaning;
     const options = shuffle([correct, ...getWrongOptions(correct, allWords, "meaning")]);
-    return {
-      prompt: wordObj.word,
-      promptLabel: "What is the meaning of this word?",
-      promptTag: "EN",
-      optionTag: "EN",
-      options,
-      correct,
-      type: "word-en",
-    };
+    return { prompt: wordObj.word, promptLabel: "What is the meaning of this word?", promptTag: "EN", optionTag: "EN", options, correct, type: "word-en" };
   } else if (mode === 1) {
-    // Significado EN → palabra EN
     const correct = wordObj.word;
     const options = shuffle([correct, ...getWrongOptions(correct, allWords, "word")]);
-    return {
-      prompt: wordObj.meaning,
-      promptLabel: "Which word matches this definition?",
-      promptTag: "EN",
-      optionTag: "EN",
-      options,
-      correct,
-      type: "meaning-en",
-    };
+    return { prompt: wordObj.meaning, promptLabel: "Which word matches this definition?", promptTag: "EN", optionTag: "EN", options, correct, type: "meaning-en" };
   } else if (mode === 2) {
-    // Palabra EN → significado ES
     const correct = wordObj.es;
     const options = shuffle([correct, ...getWrongOptions(correct, allWords, "es")]);
-    return {
-      prompt: wordObj.word,
-      promptLabel: "¿Cuál es el significado en español?",
-      promptTag: "EN",
-      optionTag: "ES",
-      options,
-      correct,
-      type: "word-en-to-es",
-    };
+    return { prompt: wordObj.word, promptLabel: "¿Cuál es el significado en español?", promptTag: "EN", optionTag: "ES", options, correct, type: "word-en-to-es" };
   } else {
-    // Palabra ES → significado EN
     const correct = wordObj.meaning;
     const options = shuffle([correct, ...getWrongOptions(correct, allWords, "meaning")]);
-    return {
-      prompt: wordObj.es,
-      promptLabel: "Select the English meaning of this word:",
-      promptTag: "ES",
-      optionTag: "EN",
-      options,
-      correct,
-      type: "word-es-to-en",
-    };
+    return { prompt: wordObj.es, promptLabel: "Select the English meaning of this word:", promptTag: "ES", optionTag: "EN", options, correct, type: "word-es-to-en" };
   }
 }
 
@@ -105,6 +64,7 @@ export default function Game() {
   const [score, setScore] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [countdown, setCountdown] = useState(null);
 
   const { queue, queueIndex, question } = gameState;
 
@@ -113,6 +73,7 @@ export default function Game() {
     setSelected(option);
     const correct = option === question.correct;
     setIsCorrect(correct);
+
     if (correct) {
       setScore((s) => s + 100 + streak * 10);
       setStreak((s) => s + 1);
@@ -121,7 +82,20 @@ export default function Game() {
     }
     setWordCount((c) => c + 1);
 
+    // 1 segundo si correcto, 5 segundos si incorrecto
+    const delay = correct ? 1 : 5;
+    setCountdown(correct ? null : delay); // solo muestra countdown si se equivocó
+
+    let remaining = delay;
+    const interval = correct ? null : setInterval(() => {
+      remaining -= 1;
+      setCountdown(remaining);
+      if (remaining <= 0) clearInterval(interval);
+    }, 1000);
+
     setTimeout(() => {
+      if (interval) clearInterval(interval);
+      setCountdown(null);
       const nextIdx = queueIndex + 1;
       let newQueue = queue;
       let realIdx = nextIdx;
@@ -132,7 +106,7 @@ export default function Game() {
       setGameState({ queue: newQueue, queueIndex: realIdx, question: buildQuestion(newQueue[realIdx], WORDS) });
       setSelected(null);
       setIsCorrect(null);
-    }, 5000);
+    }, delay * 1000);
   }
 
   async function saveAndExit() {
@@ -161,7 +135,6 @@ export default function Game() {
   }
 
   const progress = Math.min((wordCount / WORDS.length) * 100, 100);
-
   const isLargePrompt = question.type === "word-en" || question.type === "word-en-to-es" || question.type === "word-es-to-en";
 
   return (
@@ -191,13 +164,9 @@ export default function Game() {
 
         {/* Question label + language tags */}
         <div className="flex items-center gap-3 mb-3">
-          <span className="px-2 py-0.5 rounded-md bg-[#7E3FFE]/20 border border-[#7E3FFE]/40 text-[#9A8EBC] text-xs font-semibold">
-            {question.promptTag}
-          </span>
+          <span className="px-2 py-0.5 rounded-md bg-[#7E3FFE]/20 border border-[#7E3FFE]/40 text-[#9A8EBC] text-xs font-semibold">{question.promptTag}</span>
           <p className="text-[#9A8EBC] text-sm">{question.promptLabel}</p>
-          <span className="px-2 py-0.5 rounded-md bg-[#3C83FE]/20 border border-[#3C83FE]/40 text-[#9A8EBC] text-xs font-semibold">
-            {question.optionTag}
-          </span>
+          <span className="px-2 py-0.5 rounded-md bg-[#3C83FE]/20 border border-[#3C83FE]/40 text-[#9A8EBC] text-xs font-semibold">{question.optionTag}</span>
         </div>
 
         {/* Prompt card */}
@@ -237,10 +206,21 @@ export default function Game() {
 
         {/* Feedback */}
         {selected !== null && (
-          <div className={`mt-6 text-lg font-bold ${isCorrect ? "text-green-400" : "text-red-400"}`}>
-            {isCorrect
-              ? `✓ Correct! +${100 + (streak - 1) * 10} pts`
-              : `✗ Correct answer: "${question.correct}"`}
+          <div className="mt-6 flex flex-col items-center gap-2">
+            <div className={`text-lg font-bold ${isCorrect ? "text-green-400" : "text-red-400"}`}>
+              {isCorrect
+                ? `✓ Correct! +${100 + (streak - 1) * 10} pts`
+                : `✗ Correct answer: "${question.correct}"`}
+            </div>
+            {/* Countdown solo si se equivocó */}
+            {countdown !== null && (
+              <div className="flex items-center gap-2 text-red-400/70 text-sm font-medium">
+                <div className="w-7 h-7 rounded-full border-2 border-red-400/50 flex items-center justify-center font-bold text-base text-red-400">
+                  {countdown}
+                </div>
+                <span>Read the answer carefully...</span>
+              </div>
+            )}
           </div>
         )}
 
