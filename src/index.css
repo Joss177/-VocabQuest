@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Reset root para que Tailwind tome el control total */
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  text-align: left;
+  border: none;
+  min-height: 100svh;
+  display: block;
+}
+
+/* Date input oscuro en Chrome/Safari */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.7);
+  cursor: pointer;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0E0B20;
+}
+::-webkit-scrollbar-thumb {
+  background: #44386F;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7E3FFE;
+}
